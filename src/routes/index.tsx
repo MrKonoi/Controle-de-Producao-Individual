@@ -16,7 +16,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Controle de Produção Diária" },
       {
         property: "og:description",
-        content: "Registre a produção diária por item e subitem em poucos toques.",
+        content: "Registre a produção diária por item e subitem em poucos toques, direto do celular.",
       },
     ],
   }),

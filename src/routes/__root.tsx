@@ -81,10 +81,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         name: "viewport",
         content: "width=device-width, initial-scale=1, viewport-fit=cover",
       },
-      { title: "Controle de Produção" },
-      { name: "description", content: "Registro simples da produção diária." },
+      { title: "Controle de Produção Diária" },
+      { name: "description", content: "Registre a produção diária por item e subitem em poucos toques, direto do celular." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:title", content: "Controle de Produção Diária" },
+      { name: "twitter:title", content: "Controle de Produção Diária" },
+      { property: "og:description", content: "Registre a produção diária por item e subitem em poucos toques, direto do celular." },
+      { name: "twitter:description", content: "Registre a produção diária por item e subitem em poucos toques, direto do celular." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/3dfc0f6f-9f4d-47d0-bfb9-fc6be0e06716/id-preview-3e5119fd--4f350f46-56d4-4276-881c-851af4245e50.lovable.app-1785259041101.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/3dfc0f6f-9f4d-47d0-bfb9-fc6be0e06716/id-preview-3e5119fd--4f350f46-56d4-4276-881c-851af4245e50.lovable.app-1785259041101.png" },
     ],
     links: [
       {
