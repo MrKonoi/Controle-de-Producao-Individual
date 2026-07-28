@@ -142,3 +142,12 @@
     color: var(--color-foreground);
   }
 }
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    font-family: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  }
+}
