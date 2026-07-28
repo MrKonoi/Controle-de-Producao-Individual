@@ -9,10 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MensalRouteImport } from './routes/mensal'
 import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ItemItemIdRouteImport } from './routes/item.$itemId'
 
+const MensalRoute = MensalRouteImport.update({
+  id: '/mensal',
+  path: '/mensal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalendarioRoute = CalendarioRouteImport.update({
   id: '/calendario',
   path: '/calendario',
@@ -32,35 +38,46 @@ const ItemItemIdRoute = ItemItemIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calendario': typeof CalendarioRoute
+  '/mensal': typeof MensalRoute
   '/item/$itemId': typeof ItemItemIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calendario': typeof CalendarioRoute
+  '/mensal': typeof MensalRoute
   '/item/$itemId': typeof ItemItemIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/calendario': typeof CalendarioRoute
+  '/mensal': typeof MensalRoute
   '/item/$itemId': typeof ItemItemIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/calendario' | '/item/$itemId'
+  fullPaths: '/' | '/calendario' | '/mensal' | '/item/$itemId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/calendario' | '/item/$itemId'
-  id: '__root__' | '/' | '/calendario' | '/item/$itemId'
+  to: '/' | '/calendario' | '/mensal' | '/item/$itemId'
+  id: '__root__' | '/' | '/calendario' | '/mensal' | '/item/$itemId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalendarioRoute: typeof CalendarioRoute
+  MensalRoute: typeof MensalRoute
   ItemItemIdRoute: typeof ItemItemIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/mensal': {
+      id: '/mensal'
+      path: '/mensal'
+      fullPath: '/mensal'
+      preLoaderRoute: typeof MensalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calendario': {
       id: '/calendario'
       path: '/calendario'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalendarioRoute: CalendarioRoute,
+  MensalRoute: MensalRoute,
   ItemItemIdRoute: ItemItemIdRoute,
 }
 export const routeTree = rootRouteImport
