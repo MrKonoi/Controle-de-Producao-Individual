@@ -132,7 +132,7 @@ export function deleteSubitem(id: string) {
   setDB({
     ...db,
     subitens: db.subitens.filter((s) => s.id !== id),
-    producao: db.producao.filter((p) => p.subiten_id_hack !== undefined ? true : p.subitem_id !== id),
+    producao: db.producao.filter((p) => p.subitem_id !== id),
   });
 }
 
