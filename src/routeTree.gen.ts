@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as MensalRouteImport } from './routes/mensal'
 import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ItemItemIdRouteImport } from './routes/item.$itemId'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MensalRoute = MensalRouteImport.update({
   id: '/mensal',
   path: '/mensal',
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/calendario': typeof CalendarioRoute
   '/mensal': typeof MensalRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/item/$itemId': typeof ItemItemIdRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/calendario': typeof CalendarioRoute
   '/mensal': typeof MensalRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/item/$itemId': typeof ItemItemIdRoute
 }
 export interface FileRoutesById {
@@ -61,14 +69,34 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/calendario': typeof CalendarioRoute
   '/mensal': typeof MensalRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/item/$itemId': typeof ItemItemIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/calendario' | '/mensal' | '/item/$itemId'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/calendario'
+    | '/mensal'
+    | '/sitemap.xml'
+    | '/item/$itemId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/calendario' | '/mensal' | '/item/$itemId'
-  id: '__root__' | '/' | '/admin' | '/calendario' | '/mensal' | '/item/$itemId'
+  to:
+    | '/'
+    | '/admin'
+    | '/calendario'
+    | '/mensal'
+    | '/sitemap.xml'
+    | '/item/$itemId'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/calendario'
+    | '/mensal'
+    | '/sitemap.xml'
+    | '/item/$itemId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -76,11 +104,19 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   CalendarioRoute: typeof CalendarioRoute
   MensalRoute: typeof MensalRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ItemItemIdRoute: typeof ItemItemIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mensal': {
       id: '/mensal'
       path: '/mensal'
@@ -124,8 +160,19 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   CalendarioRoute: CalendarioRoute,
   MensalRoute: MensalRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ItemItemIdRoute: ItemItemIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
