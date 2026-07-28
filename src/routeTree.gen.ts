@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as MensalRouteImport } from './routes/mensal'
 import { Route as CalendarioRouteImport } from './routes/calendario'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ItemItemIdRouteImport } from './routes/item.$itemId'
 
@@ -22,6 +23,11 @@ const MensalRoute = MensalRouteImport.update({
 const CalendarioRoute = CalendarioRouteImport.update({
   id: '/calendario',
   path: '/calendario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -37,12 +43,14 @@ const ItemItemIdRoute = ItemItemIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/calendario': typeof CalendarioRoute
   '/mensal': typeof MensalRoute
   '/item/$itemId': typeof ItemItemIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/calendario': typeof CalendarioRoute
   '/mensal': typeof MensalRoute
   '/item/$itemId': typeof ItemItemIdRoute
@@ -50,20 +58,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/calendario': typeof CalendarioRoute
   '/mensal': typeof MensalRoute
   '/item/$itemId': typeof ItemItemIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/calendario' | '/mensal' | '/item/$itemId'
+  fullPaths: '/' | '/admin' | '/calendario' | '/mensal' | '/item/$itemId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/calendario' | '/mensal' | '/item/$itemId'
-  id: '__root__' | '/' | '/calendario' | '/mensal' | '/item/$itemId'
+  to: '/' | '/admin' | '/calendario' | '/mensal' | '/item/$itemId'
+  id: '__root__' | '/' | '/admin' | '/calendario' | '/mensal' | '/item/$itemId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   CalendarioRoute: typeof CalendarioRoute
   MensalRoute: typeof MensalRoute
   ItemItemIdRoute: typeof ItemItemIdRoute
@@ -85,6 +95,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalendarioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -104,6 +121,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   CalendarioRoute: CalendarioRoute,
   MensalRoute: MensalRoute,
   ItemItemIdRoute: ItemItemIdRoute,
