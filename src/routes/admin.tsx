@@ -1,15 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Archive, ArchiveRestore, Check, Pencil, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import {
   useDB,
   addItem,
   updateItem,
-  deleteItem,
+  arquivarItem,
+  restaurarItem,
   addSubitem,
   updateSubitem,
-  deleteSubitem,
+  arquivarSubitem,
+  restaurarSubitem,
 } from "@/lib/producao-store";
 
 export const Route = createFileRoute("/admin")({
@@ -19,12 +21,12 @@ export const Route = createFileRoute("/admin")({
       { title: "Ajustes: itens e subitens" },
       {
         name: "description",
-        content: "Cadastre, edite e exclua itens e subitens da produção sem programar nada.",
+        content: "Cadastre, edite e arquive itens e subitens da produção sem programar nada.",
       },
       { property: "og:title", content: "Ajustes: itens e subitens" },
       {
         property: "og:description",
-        content: "Cadastre, edite e exclua itens e subitens da produção.",
+        content: "Cadastre, edite e arquive itens e subitens da produção.",
       },
     ],
   }),
@@ -41,6 +43,12 @@ function Admin() {
     setEditando(id);
     setRascunho(nome);
   };
+
+  const itensAtivos = db.itens.filter((i) => !i.arquivado);
+  const itensArquivados = db.itens.filter((i) => i.arquivado);
+  const subsArquivados = db.subitens.filter(
+    (s) => s.arquivado && !db.itens.find((i) => i.id === s.item_id)?.arquivado,
+  );
 
   return (
     <AppShell title="Ajustes" subtitle="Itens e medidas">
@@ -65,8 +73,8 @@ function Admin() {
       </div>
 
       <div className="mt-4 space-y-3">
-        {db.itens.map((item) => {
-          const subs = db.subitens.filter((s) => s.item_id === item.id);
+        {itensAtivos.map((item) => {
+          const subs = db.subitens.filter((s) => s.item_id === item.id && !s.arquivado);
           return (
             <div key={item.id} className="rounded-3xl bg-card p-4 shadow-sm">
               {editando === item.id ? (
@@ -87,14 +95,18 @@ function Admin() {
                       <Pencil className="h-4 w-4" />
                     </IconBtn>
                     <IconBtn
-                      label="Excluir item"
+                      label="Arquivar item"
                       danger
                       onClick={() => {
-                        if (confirm(`Excluir "${item.nome}" e todos os seus registros?`))
-                          deleteItem(item.id);
+                        if (
+                          confirm(
+                            `Arquivar "${item.nome}"? O histórico continua nos relatórios.`,
+                          )
+                        )
+                          arquivarItem(item.id);
                       }}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Archive className="h-4 w-4" />
                     </IconBtn>
                   </span>
                 </div>
@@ -125,13 +137,14 @@ function Admin() {
                           <Pencil className="h-4 w-4" />
                         </IconBtn>
                         <IconBtn
-                          label="Excluir subitem"
+                          label="Arquivar subitem"
                           danger
                           onClick={() => {
-                            if (confirm(`Excluir "${s.nome}"?`)) deleteSubitem(s.id);
+                            if (confirm(`Arquivar "${s.nome}"? O histórico é preservado.`))
+                              arquivarSubitem(s.id);
                           }}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Archive className="h-4 w-4" />
                         </IconBtn>
                       </span>
                     </li>
@@ -163,6 +176,43 @@ function Admin() {
           );
         })}
       </div>
+
+      {(itensArquivados.length > 0 || subsArquivados.length > 0) && (
+        <div className="mt-6">
+          <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-muted-foreground">
+            Arquivados
+          </h2>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Não aparecem em novos lançamentos, mas continuam no histórico e nos relatórios.
+          </p>
+          <ul className="space-y-2">
+            {itensArquivados.map((i) => (
+              <li
+                key={i.id}
+                className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-2xl bg-card px-4 py-3 shadow-sm"
+              >
+                <span className="min-w-0 truncate font-bold">{i.nome}</span>
+                <IconBtn label={`Restaurar ${i.nome}`} onClick={() => restaurarItem(i.id)}>
+                  <ArchiveRestore className="h-4 w-4" />
+                </IconBtn>
+              </li>
+            ))}
+            {subsArquivados.map((s) => (
+              <li
+                key={s.id}
+                className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-2xl bg-card px-4 py-3 shadow-sm"
+              >
+                <span className="min-w-0 truncate text-sm font-medium">
+                  {db.itens.find((i) => i.id === s.item_id)?.nome ?? "—"} · {s.nome}
+                </span>
+                <IconBtn label={`Restaurar ${s.nome}`} onClick={() => restaurarSubitem(s.id)}>
+                  <ArchiveRestore className="h-4 w-4" />
+                </IconBtn>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </AppShell>
   );
 }

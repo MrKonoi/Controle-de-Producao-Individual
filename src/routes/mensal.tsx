@@ -33,20 +33,18 @@ function Mensal() {
   const registros = db.producao.filter((p) => p.data.startsWith(prefixo));
   const total = registros.reduce((s, p) => s + p.quantidade, 0);
 
-  const grupos = db.itens
-    .map((item) => {
-      const subs = db.subitens
-        .filter((s) => s.item_id === item.id)
-        .map((s) => ({
-          nome: s.nome,
-          qtd: registros
-            .filter((p) => p.subitem_id === s.id)
-            .reduce((acc, p) => acc + p.quantidade, 0),
-        }))
-        .filter((s) => s.qtd > 0);
-      return { item, subs, total: subs.reduce((a, s) => a + s.qtd, 0) };
-    })
-    .filter((g) => g.total > 0);
+  const nomesItens = Array.from(new Set(registros.map((p) => p.item_nome)));
+  const grupos = nomesItens.map((nome) => {
+    const doItem = registros.filter((p) => p.item_nome === nome);
+    const nomesSubs = Array.from(new Set(doItem.map((p) => p.subitem_nome)));
+    const subs = nomesSubs.map((sn) => ({
+      nome: sn,
+      qtd: doItem
+        .filter((p) => p.subitem_nome === sn)
+        .reduce((acc, p) => acc + p.quantidade, 0),
+    }));
+    return { nome, subs, total: subs.reduce((a, s) => a + s.qtd, 0) };
+  });
 
   const mudarMes = (d: number) =>
     setMesRef(new Date(mesRef.getFullYear(), mesRef.getMonth() + d, 1));
@@ -84,10 +82,10 @@ function Mensal() {
         </p>
       ) : (
         <div className="mt-4 space-y-3">
-          {grupos.map(({ item, subs, total: t }) => (
-            <div key={item.id} className="rounded-3xl bg-card p-4 shadow-sm">
+          {grupos.map(({ nome, subs, total: t }) => (
+            <div key={nome} className="rounded-3xl bg-card p-4 shadow-sm">
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
-                <span className="truncate text-lg font-extrabold">{item.nome}</span>
+                <span className="truncate text-lg font-extrabold">{nome}</span>
                 <span className="shrink-0 rounded-xl bg-secondary px-3 py-1 font-black text-primary">
                   {t}
                 </span>
