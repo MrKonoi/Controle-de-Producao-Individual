@@ -5,6 +5,9 @@ import { useDB, hojeISO, formatBR } from "@/lib/producao-store";
 
 export const Route = createFileRoute("/")({
   component: Home,
+  validateSearch: (search: Record<string, unknown>) => ({
+    data: typeof search.data === "string" ? search.data : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Controle de Produção Diária" },
@@ -24,16 +27,22 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const db = useDB();
+  const { data } = Route.useSearch();
+  const dia = data ?? hojeISO();
   const hoje = hojeISO();
-  const totalHoje = db.producao
-    .filter((p) => p.data === hoje)
+  const totalDia = db.producao
+    .filter((p) => p.data === dia)
     .reduce((s, p) => s + p.quantidade, 0);
 
+  const itensAtivos = db.itens.filter((i) => !i.arquivado);
+
   return (
-    <AppShell title="Produção" subtitle={formatBR(hoje)}>
+    <AppShell title="Produção" subtitle={formatBR(dia)}>
       <div className="mb-5 rounded-3xl bg-card p-5 shadow-sm">
-        <p className="text-sm font-medium text-muted-foreground">Produzido hoje</p>
-        <p className="text-4xl font-black text-foreground">{totalHoje}</p>
+        <p className="text-sm font-medium text-muted-foreground">
+          {dia === hoje ? "Produzido hoje" : `Produzido em ${formatBR(dia)}`}
+        </p>
+        <p className="text-4xl font-black text-foreground">{totalDia}</p>
         <Link
           to="/calendario"
           className="mt-2 inline-block text-sm font-semibold text-primary"
@@ -46,17 +55,20 @@ function Home() {
         Escolha o item
       </h2>
 
-      {db.itens.length === 0 ? (
+      {itensAtivos.length === 0 ? (
         <EmptyState />
       ) : (
         <div className="grid grid-cols-2 gap-3">
-          {db.itens.map((item) => {
-            const subs = db.subitens.filter((s) => s.item_id === item.id).length;
+          {itensAtivos.map((item) => {
+            const subs = db.subitens.filter(
+              (s) => s.item_id === item.id && !s.arquivado,
+            ).length;
             return (
               <Link
                 key={item.id}
                 to="/item/$itemId"
                 params={{ itemId: item.id }}
+                search={{ data: dia }}
                 className="flex min-h-32 flex-col justify-between rounded-3xl bg-card p-4 shadow-sm active:scale-[0.98] transition-transform"
               >
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-secondary text-primary">
