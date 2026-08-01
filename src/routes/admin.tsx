@@ -236,6 +236,8 @@ function Admin() {
           </ul>
         </div>
       )}
+
+      <InstalarApp />
     </AppShell>
   );
 }
