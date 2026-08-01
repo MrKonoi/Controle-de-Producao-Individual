@@ -136,6 +136,14 @@ function Calendario() {
           </span>
         </div>
 
+        {totalValor > 0 && (
+          <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] gap-2 rounded-2xl bg-secondary px-4 py-3">
+            <span className="text-sm font-bold">Valor do dia</span>
+            <span className="font-black text-primary">{formatBRL(totalValor)}</span>
+          </div>
+        )}
+
+
         {porItem.length === 0 ? (
           <p className="mt-3 text-sm text-muted-foreground">Nenhum registro neste dia.</p>
         ) : (
