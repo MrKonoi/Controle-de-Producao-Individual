@@ -67,6 +67,7 @@ function migrar(raw: DB): DB {
     item_nome: p.item_nome || itens.find((i) => i.id === p.item_id)?.nome || "Item removido",
     subitem_nome:
       p.subitem_nome || subitens.find((s) => s.id === p.subitem_id)?.nome || "Medida removida",
+    valor_unit: p.valor_unit ?? subitens.find((s) => s.id === p.subitem_id)?.valor,
   }));
   return { itens, subitens, producao };
 }
