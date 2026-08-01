@@ -1,7 +1,13 @@
 import { useSyncExternalStore } from "react";
 
 export type Item = { id: string; nome: string; arquivado?: boolean };
-export type Subitem = { id: string; item_id: string; nome: string; arquivado?: boolean };
+export type Subitem = {
+  id: string;
+  item_id: string;
+  nome: string;
+  valor?: number; // valor unitário em R$
+  arquivado?: boolean;
+};
 export type Producao = {
   id: string;
   data: string; // YYYY-MM-DD
@@ -10,6 +16,7 @@ export type Producao = {
   item_nome: string;
   subitem_nome: string;
   quantidade: number;
+  valor_unit?: number; // valor unitário no momento do registro
   observacao?: string;
   foto?: string; // dataURL
 };
