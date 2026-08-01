@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight, Package } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
-import { useDB, hojeISO, formatBR } from "@/lib/producao-store";
+import { useDB, hojeISO, formatBR, formatBRL, somaValor } from "@/lib/producao-store";
 
 export const Route = createFileRoute("/")({
   component: Home,
