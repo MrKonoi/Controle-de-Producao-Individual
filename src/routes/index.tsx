@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight, Package } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
-import { useDB, hojeISO, formatBR } from "@/lib/producao-store";
+import { useDB, hojeISO, formatBR, formatBRL, somaValor } from "@/lib/producao-store";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -30,9 +30,9 @@ function Home() {
   const { data } = Route.useSearch();
   const dia = data ?? hojeISO();
   const hoje = hojeISO();
-  const totalDia = db.producao
-    .filter((p) => p.data === dia)
-    .reduce((s, p) => s + p.quantidade, 0);
+  const registrosDia = db.producao.filter((p) => p.data === dia);
+  const totalDia = registrosDia.reduce((s, p) => s + p.quantidade, 0);
+  const valorDia = somaValor(registrosDia);
 
   const itensAtivos = db.itens.filter((i) => !i.arquivado);
 
@@ -43,6 +43,9 @@ function Home() {
           {dia === hoje ? "Produzido hoje" : `Produzido em ${formatBR(dia)}`}
         </p>
         <p className="text-4xl font-black text-foreground">{totalDia}</p>
+        {valorDia > 0 && (
+          <p className="text-lg font-extrabold text-primary">{formatBRL(valorDia)}</p>
+        )}
         <Link
           to="/calendario"
           className="mt-2 inline-block text-sm font-semibold text-primary"

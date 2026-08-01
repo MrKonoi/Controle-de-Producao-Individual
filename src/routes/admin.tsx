@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Archive, ArchiveRestore, Check, Pencil, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { InstalarApp } from "@/components/InstalarApp";
 import {
   useDB,
   addItem,
@@ -10,6 +11,7 @@ import {
   restaurarItem,
   addSubitem,
   updateSubitem,
+  setValorSubitem,
   arquivarSubitem,
   restaurarSubitem,
 } from "@/lib/producao-store";
@@ -127,26 +129,47 @@ function Admin() {
                       />
                     </li>
                   ) : (
-                    <li
-                      key={s.id}
-                      className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-2xl bg-background px-3 py-2"
-                    >
-                      <span className="min-w-0 truncate font-medium">{s.nome}</span>
-                      <span className="flex shrink-0 gap-1">
-                        <IconBtn label="Editar subitem" onClick={() => iniciarEdicao(s.id, s.nome)}>
-                          <Pencil className="h-4 w-4" />
-                        </IconBtn>
-                        <IconBtn
-                          label="Arquivar subitem"
-                          danger
-                          onClick={() => {
-                            if (confirm(`Arquivar "${s.nome}"? O histórico é preservado.`))
-                              arquivarSubitem(s.id);
-                          }}
+                    <li key={s.id} className="rounded-2xl bg-background px-3 py-2">
+                      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+                        <span className="min-w-0 truncate font-medium">{s.nome}</span>
+                        <span className="flex shrink-0 gap-1">
+                          <IconBtn
+                            label="Editar subitem"
+                            onClick={() => iniciarEdicao(s.id, s.nome)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </IconBtn>
+                          <IconBtn
+                            label="Arquivar subitem"
+                            danger
+                            onClick={() => {
+                              if (confirm(`Arquivar "${s.nome}"? O histórico é preservado.`))
+                                arquivarSubitem(s.id);
+                            }}
+                          >
+                            <Archive className="h-4 w-4" />
+                          </IconBtn>
+                        </span>
+                      </div>
+                      <div className="mt-2 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2">
+                        <label
+                          htmlFor={`valor-${s.id}`}
+                          className="text-xs font-bold text-muted-foreground"
                         >
-                          <Archive className="h-4 w-4" />
-                        </IconBtn>
-                      </span>
+                          Valor unitário (R$)
+                        </label>
+                        <input
+                          id={`valor-${s.id}`}
+                          inputMode="decimal"
+                          value={s.valor ?? ""}
+                          placeholder="0,00"
+                          onChange={(e) => {
+                            const n = Number(e.target.value.replace(",", "."));
+                            setValorSubitem(s.id, Number.isFinite(n) ? n : undefined);
+                          }}
+                          className="h-10 min-w-0 rounded-xl border border-border bg-card px-3 text-sm font-bold outline-none focus:border-primary"
+                        />
+                      </div>
                     </li>
                   ),
                 )}
@@ -213,6 +236,8 @@ function Admin() {
           </ul>
         </div>
       )}
+
+      <InstalarApp />
     </AppShell>
   );
 }

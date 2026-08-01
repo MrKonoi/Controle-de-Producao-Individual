@@ -8,6 +8,7 @@ import {
   registrar,
   hojeISO,
   formatBR,
+  formatBRL,
   comprimirImagem,
 } from "@/lib/producao-store";
 
@@ -47,6 +48,10 @@ function ItemPage() {
   const item = db.itens.find((i) => i.id === itemId);
   const subitens = db.subitens.filter((s) => s.item_id === itemId && !s.arquivado);
   const total = Object.values(qtds).reduce((s, n) => s + n, 0);
+  const totalValor = subitens.reduce(
+    (s, sub) => s + (sub.valor ?? 0) * (qtds[sub.id] ?? 0),
+    0,
+  );
 
   const set = (id: string, v: number) => setQtds((p) => ({ ...p, [id]: Math.max(0, v) }));
 
@@ -100,7 +105,14 @@ function ItemPage() {
                 key={s.id}
                 className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-3xl bg-card p-4 shadow-sm"
               >
-                <span className="min-w-0 truncate text-lg font-bold">{s.nome}</span>
+                <span className="min-w-0">
+                  <span className="block truncate text-lg font-bold">{s.nome}</span>
+                  <span className="block text-xs font-medium text-muted-foreground">
+                    {s.valor
+                      ? `${formatBRL(s.valor)} un.${v > 0 ? ` · ${formatBRL(s.valor * v)}` : ""}`
+                      : "Sem valor definido"}
+                  </span>
+                </span>
                 <div className="flex shrink-0 items-center gap-2">
                   <button
                     aria-label={`Diminuir ${s.nome}`}
@@ -163,10 +175,20 @@ function ItemPage() {
                 .map((s) => (
                   <li key={s.id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 text-sm">
                     <span className="min-w-0 truncate text-muted-foreground">{s.nome}</span>
-                    <span className="shrink-0 font-bold">{qtds[s.id]}</span>
+                    <span className="shrink-0 font-bold">
+                      {qtds[s.id]}
+                      {s.valor ? ` · ${formatBRL(s.valor * (qtds[s.id] ?? 0))}` : ""}
+                    </span>
                   </li>
                 ))}
             </ul>
+
+            {totalValor > 0 && (
+              <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] gap-2 rounded-2xl bg-secondary px-4 py-3">
+                <span className="text-sm font-bold">Valor total</span>
+                <span className="font-black text-primary">{formatBRL(totalValor)}</span>
+              </div>
+            )}
 
             <label className="mt-4 block text-sm font-bold" htmlFor="obs">
               Observação (opcional)

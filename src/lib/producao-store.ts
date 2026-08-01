@@ -1,7 +1,13 @@
 import { useSyncExternalStore } from "react";
 
 export type Item = { id: string; nome: string; arquivado?: boolean };
-export type Subitem = { id: string; item_id: string; nome: string; arquivado?: boolean };
+export type Subitem = {
+  id: string;
+  item_id: string;
+  nome: string;
+  valor?: number; // valor unitário em R$
+  arquivado?: boolean;
+};
 export type Producao = {
   id: string;
   data: string; // YYYY-MM-DD
@@ -10,6 +16,7 @@ export type Producao = {
   item_nome: string;
   subitem_nome: string;
   quantidade: number;
+  valor_unit?: number; // valor unitário no momento do registro
   observacao?: string;
   foto?: string; // dataURL
 };
@@ -60,6 +67,7 @@ function migrar(raw: DB): DB {
     item_nome: p.item_nome || itens.find((i) => i.id === p.item_id)?.nome || "Item removido",
     subitem_nome:
       p.subitem_nome || subitens.find((s) => s.id === p.subitem_id)?.nome || "Medida removida",
+    valor_unit: p.valor_unit ?? subitens.find((s) => s.id === p.subitem_id)?.valor,
   }));
   return { itens, subitens, producao };
 }
@@ -149,6 +157,15 @@ export function updateSubitem(id: string, nome: string) {
     subitens: db.subitens.map((s) => (s.id === id ? { ...s, nome: nome.trim() } : s)),
   });
 }
+export function setValorSubitem(id: string, valor: number | undefined) {
+  setDB({
+    ...db,
+    subitens: db.subitens.map((s) =>
+      s.id === id ? { ...s, valor: valor && valor > 0 ? valor : undefined } : s,
+    ),
+  });
+}
+
 export function arquivarSubitem(id: string) {
   setDB({
     ...db,
@@ -172,8 +189,8 @@ export function registrar(
   for (const e of entradas) {
     if (e.quantidade === 0) continue;
     const item_nome = db.itens.find((i) => i.id === e.item_id)?.nome ?? "Item removido";
-    const subitem_nome =
-      db.subitens.find((s) => s.id === e.subitem_id)?.nome ?? "Medida removida";
+    const sub = db.subitens.find((s) => s.id === e.subitem_id);
+    const subitem_nome = sub?.nome ?? "Medida removida";
     const idx = producao.findIndex((p) => p.data === data && p.subitem_id === e.subitem_id);
     if (idx >= 0) {
       producao[idx] = {
@@ -181,6 +198,7 @@ export function registrar(
         quantidade: producao[idx].quantidade + e.quantidade,
         item_nome,
         subitem_nome,
+        valor_unit: sub?.valor ?? producao[idx].valor_unit,
         observacao: extras?.observacao || producao[idx].observacao,
         foto: extras?.foto || producao[idx].foto,
       };
@@ -191,6 +209,7 @@ export function registrar(
         ...e,
         item_nome,
         subitem_nome,
+        valor_unit: sub?.valor,
         observacao: extras?.observacao || undefined,
         foto: extras?.foto || undefined,
       });
@@ -287,3 +306,16 @@ export const MESES = [
   "Novembro",
   "Dezembro",
 ];
+
+/* ---------- Valores ---------- */
+export function formatBRL(v: number) {
+  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+export function valorRegistro(p: Producao) {
+  return (p.valor_unit ?? 0) * p.quantidade;
+}
+
+export function somaValor(registros: Producao[]) {
+  return registros.reduce((s, p) => s + valorRegistro(p), 0);
+}

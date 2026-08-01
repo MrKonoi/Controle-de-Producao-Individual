@@ -6,12 +6,15 @@ import {
   useDB,
   hojeISO,
   formatBR,
+  formatBRL,
   fromISO,
   toISO,
   setQuantidade,
   setObservacao,
   removerFoto,
   deleteProducao,
+  somaValor,
+  valorRegistro,
   MESES,
 } from "@/lib/producao-store";
 
@@ -44,6 +47,7 @@ function Calendario() {
 
   const registros = db.producao.filter((p) => p.data === dia);
   const total = registros.reduce((s, p) => s + p.quantidade, 0);
+  const totalValor = somaValor(registros);
 
   const primeiroDiaSemana = new Date(mesRef.getFullYear(), mesRef.getMonth(), 1).getDay();
   const diasNoMes = new Date(mesRef.getFullYear(), mesRef.getMonth() + 1, 0).getDate();
@@ -132,6 +136,14 @@ function Calendario() {
           </span>
         </div>
 
+        {totalValor > 0 && (
+          <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] gap-2 rounded-2xl bg-secondary px-4 py-3">
+            <span className="text-sm font-bold">Valor do dia</span>
+            <span className="font-black text-primary">{formatBRL(totalValor)}</span>
+          </div>
+        )}
+
+
         {porItem.length === 0 ? (
           <p className="mt-3 text-sm text-muted-foreground">Nenhum registro neste dia.</p>
         ) : (
@@ -142,14 +154,22 @@ function Calendario() {
                   <span className="truncate font-bold">{nome}</span>
                   <span className="shrink-0 font-bold text-muted-foreground">
                     {linhas.reduce((s, l) => s + l.quantidade, 0)}
+                    {somaValor(linhas) > 0 ? ` · ${formatBRL(somaValor(linhas))}` : ""}
                   </span>
                 </div>
                 <ul className="mt-2 space-y-3">
                   {linhas.map((l) => (
                     <li key={l.id} className="space-y-2">
                       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
-                        <span className="min-w-0 truncate text-sm font-medium">
-                          {l.subitem_nome}
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-medium">
+                            {l.subitem_nome}
+                          </span>
+                          {valorRegistro(l) > 0 && (
+                            <span className="block text-xs font-medium text-muted-foreground">
+                              {formatBRL(valorRegistro(l))}
+                            </span>
+                          )}
                         </span>
                         <span className="flex shrink-0 items-center gap-1">
                           <button
