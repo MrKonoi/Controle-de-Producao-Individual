@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Archive, ArchiveRestore, Check, Pencil, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { InstalarApp } from "@/components/InstalarApp";
 import {
   useDB,
   addItem,
@@ -10,6 +11,7 @@ import {
   restaurarItem,
   addSubitem,
   updateSubitem,
+  setValorSubitem,
   arquivarSubitem,
   restaurarSubitem,
 } from "@/lib/producao-store";
