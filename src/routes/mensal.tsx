@@ -82,6 +82,7 @@ function Mensal() {
       <div className="mt-4 rounded-3xl bg-primary p-5 text-primary-foreground shadow-sm">
         <p className="text-sm font-medium opacity-85">Total geral do mês</p>
         <p className="text-4xl font-black">{total}</p>
+        <p className="mt-1 text-lg font-extrabold opacity-90">{formatBRL(totalValor)}</p>
       </div>
 
       {grupos.length === 0 ? (
@@ -90,10 +91,17 @@ function Mensal() {
         </p>
       ) : (
         <div className="mt-4 space-y-3">
-          {grupos.map(({ nome, subs, total: t }) => (
+          {grupos.map(({ nome, subs, total: t, valor }) => (
             <div key={nome} className="rounded-3xl bg-card p-4 shadow-sm">
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
-                <span className="truncate text-lg font-extrabold">{nome}</span>
+                <span className="min-w-0">
+                  <span className="block truncate text-lg font-extrabold">{nome}</span>
+                  {valor > 0 && (
+                    <span className="block text-xs font-bold text-muted-foreground">
+                      {formatBRL(valor)}
+                    </span>
+                  )}
+                </span>
                 <span className="shrink-0 rounded-xl bg-secondary px-3 py-1 font-black text-primary">
                   {t}
                 </span>
@@ -105,10 +113,14 @@ function Mensal() {
                     className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 text-sm"
                   >
                     <span className="min-w-0 truncate text-muted-foreground">{s.nome}</span>
-                    <span className="shrink-0 font-bold">{s.qtd}</span>
+                    <span className="shrink-0 font-bold">
+                      {s.qtd}
+                      {s.valor > 0 ? ` · ${formatBRL(s.valor)}` : ""}
+                    </span>
                   </li>
                 ))}
               </ul>
+
             </div>
           ))}
         </div>
