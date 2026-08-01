@@ -105,7 +105,14 @@ function ItemPage() {
                 key={s.id}
                 className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-3xl bg-card p-4 shadow-sm"
               >
-                <span className="min-w-0 truncate text-lg font-bold">{s.nome}</span>
+                <span className="min-w-0">
+                  <span className="block truncate text-lg font-bold">{s.nome}</span>
+                  <span className="block text-xs font-medium text-muted-foreground">
+                    {s.valor
+                      ? `${formatBRL(s.valor)} un.${v > 0 ? ` · ${formatBRL(s.valor * v)}` : ""}`
+                      : "Sem valor definido"}
+                  </span>
+                </span>
                 <div className="flex shrink-0 items-center gap-2">
                   <button
                     aria-label={`Diminuir ${s.nome}`}
