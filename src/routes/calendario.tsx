@@ -6,12 +6,15 @@ import {
   useDB,
   hojeISO,
   formatBR,
+  formatBRL,
   fromISO,
   toISO,
   setQuantidade,
   setObservacao,
   removerFoto,
   deleteProducao,
+  somaValor,
+  valorRegistro,
   MESES,
 } from "@/lib/producao-store";
 
