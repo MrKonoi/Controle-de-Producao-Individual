@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
-import { useDB, MESES } from "@/lib/producao-store";
+import { useDB, MESES, formatBRL, somaValor } from "@/lib/producao-store";
 
 export const Route = createFileRoute("/mensal")({
   component: Mensal,
