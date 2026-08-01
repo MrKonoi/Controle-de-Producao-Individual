@@ -157,6 +157,15 @@ export function updateSubitem(id: string, nome: string) {
     subitens: db.subitens.map((s) => (s.id === id ? { ...s, nome: nome.trim() } : s)),
   });
 }
+export function setValorSubitem(id: string, valor: number | undefined) {
+  setDB({
+    ...db,
+    subitens: db.subitens.map((s) =>
+      s.id === id ? { ...s, valor: valor && valor > 0 ? valor : undefined } : s,
+    ),
+  });
+}
+
 export function arquivarSubitem(id: string) {
   setDB({
     ...db,
