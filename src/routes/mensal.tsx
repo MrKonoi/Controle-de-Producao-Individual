@@ -32,18 +32,26 @@ function Mensal() {
   const prefixo = `${mesRef.getFullYear()}-${String(mesRef.getMonth() + 1).padStart(2, "0")}`;
   const registros = db.producao.filter((p) => p.data.startsWith(prefixo));
   const total = registros.reduce((s, p) => s + p.quantidade, 0);
+  const totalValor = somaValor(registros);
 
   const nomesItens = Array.from(new Set(registros.map((p) => p.item_nome)));
   const grupos = nomesItens.map((nome) => {
     const doItem = registros.filter((p) => p.item_nome === nome);
     const nomesSubs = Array.from(new Set(doItem.map((p) => p.subitem_nome)));
-    const subs = nomesSubs.map((sn) => ({
-      nome: sn,
-      qtd: doItem
-        .filter((p) => p.subitem_nome === sn)
-        .reduce((acc, p) => acc + p.quantidade, 0),
-    }));
-    return { nome, subs, total: subs.reduce((a, s) => a + s.qtd, 0) };
+    const subs = nomesSubs.map((sn) => {
+      const linhas = doItem.filter((p) => p.subitem_nome === sn);
+      return {
+        nome: sn,
+        qtd: linhas.reduce((acc, p) => acc + p.quantidade, 0),
+        valor: somaValor(linhas),
+      };
+    });
+    return {
+      nome,
+      subs,
+      total: subs.reduce((a, s) => a + s.qtd, 0),
+      valor: somaValor(doItem),
+    };
   });
 
   const mudarMes = (d: number) =>
