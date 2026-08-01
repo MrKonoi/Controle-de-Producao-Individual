@@ -8,6 +8,7 @@ import {
   registrar,
   hojeISO,
   formatBR,
+  formatBRL,
   comprimirImagem,
 } from "@/lib/producao-store";
 
