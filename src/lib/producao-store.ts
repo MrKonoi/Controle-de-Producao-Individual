@@ -306,3 +306,16 @@ export const MESES = [
   "Novembro",
   "Dezembro",
 ];
+
+/* ---------- Valores ---------- */
+export function formatBRL(v: number) {
+  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+export function valorRegistro(p: Producao) {
+  return (p.valor_unit ?? 0) * p.quantidade;
+}
+
+export function somaValor(registros: Producao[]) {
+  return registros.reduce((s, p) => s + valorRegistro(p), 0);
+}
