@@ -47,6 +47,7 @@ function Calendario() {
 
   const registros = db.producao.filter((p) => p.data === dia);
   const total = registros.reduce((s, p) => s + p.quantidade, 0);
+  const totalValor = somaValor(registros);
 
   const primeiroDiaSemana = new Date(mesRef.getFullYear(), mesRef.getMonth(), 1).getDay();
   const diasNoMes = new Date(mesRef.getFullYear(), mesRef.getMonth() + 1, 0).getDate();
