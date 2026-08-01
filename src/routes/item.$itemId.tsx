@@ -48,6 +48,10 @@ function ItemPage() {
   const item = db.itens.find((i) => i.id === itemId);
   const subitens = db.subitens.filter((s) => s.item_id === itemId && !s.arquivado);
   const total = Object.values(qtds).reduce((s, n) => s + n, 0);
+  const totalValor = subitens.reduce(
+    (s, sub) => s + (sub.valor ?? 0) * (qtds[sub.id] ?? 0),
+    0,
+  );
 
   const set = (id: string, v: number) => setQtds((p) => ({ ...p, [id]: Math.max(0, v) }));
 
