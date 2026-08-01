@@ -154,14 +154,22 @@ function Calendario() {
                   <span className="truncate font-bold">{nome}</span>
                   <span className="shrink-0 font-bold text-muted-foreground">
                     {linhas.reduce((s, l) => s + l.quantidade, 0)}
+                    {somaValor(linhas) > 0 ? ` · ${formatBRL(somaValor(linhas))}` : ""}
                   </span>
                 </div>
                 <ul className="mt-2 space-y-3">
                   {linhas.map((l) => (
                     <li key={l.id} className="space-y-2">
                       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
-                        <span className="min-w-0 truncate text-sm font-medium">
-                          {l.subitem_nome}
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-medium">
+                            {l.subitem_nome}
+                          </span>
+                          {valorRegistro(l) > 0 && (
+                            <span className="block text-xs font-medium text-muted-foreground">
+                              {formatBRL(valorRegistro(l))}
+                            </span>
+                          )}
                         </span>
                         <span className="flex shrink-0 items-center gap-1">
                           <button
