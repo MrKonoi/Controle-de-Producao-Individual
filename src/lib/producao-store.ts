@@ -189,8 +189,8 @@ export function registrar(
   for (const e of entradas) {
     if (e.quantidade === 0) continue;
     const item_nome = db.itens.find((i) => i.id === e.item_id)?.nome ?? "Item removido";
-    const subitem_nome =
-      db.subitens.find((s) => s.id === e.subitem_id)?.nome ?? "Medida removida";
+    const sub = db.subitens.find((s) => s.id === e.subitem_id);
+    const subitem_nome = sub?.nome ?? "Medida removida";
     const idx = producao.findIndex((p) => p.data === data && p.subitem_id === e.subitem_id);
     if (idx >= 0) {
       producao[idx] = {
@@ -198,6 +198,7 @@ export function registrar(
         quantidade: producao[idx].quantidade + e.quantidade,
         item_nome,
         subitem_nome,
+        valor_unit: sub?.valor ?? producao[idx].valor_unit,
         observacao: extras?.observacao || producao[idx].observacao,
         foto: extras?.foto || producao[idx].foto,
       };
@@ -208,6 +209,7 @@ export function registrar(
         ...e,
         item_nome,
         subitem_nome,
+        valor_unit: sub?.valor,
         observacao: extras?.observacao || undefined,
         foto: extras?.foto || undefined,
       });
