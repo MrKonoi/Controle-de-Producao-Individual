@@ -1,6 +1,7 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { CalendarDays, LayoutGrid, BarChart3, Settings } from "lucide-react";
-import type { ReactNode } from "react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { CalendarDays, LayoutGrid, BarChart3, Settings, LogOut } from "lucide-react";
+import { useEffect, type ReactNode } from "react";
+import { useAuth, sair } from "@/lib/auth-store";
 
 const nav = [
   { to: "/", label: "Produzir", icon: LayoutGrid },
@@ -21,18 +22,39 @@ export function AppShell({
   children: ReactNode;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { atual, pronto } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (pronto && !atual) navigate({ to: "/login", replace: true });
+  }, [pronto, atual, navigate]);
+
+  if (!pronto || !atual) {
+    return <div className="min-h-screen bg-background" />;
+  }
 
   return (
     <div className="min-h-screen bg-background pb-24">
       <header className="sticky top-0 z-20 bg-primary text-primary-foreground shadow-sm">
-        <div className="mx-auto grid max-w-2xl grid-cols-[auto_minmax(0,1fr)] items-center gap-3 px-4 py-4">
+        <div className="mx-auto grid max-w-2xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-4">
           {left}
           <div className="min-w-0">
-            <h1 className="truncate text-xl font-extrabold tracking-tight">{title}</h1>
+            <h1 className="text-xl font-extrabold leading-tight tracking-tight">{title}</h1>
             {subtitle ? (
               <p className="truncate text-sm opacity-85">{subtitle}</p>
             ) : null}
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              sair();
+              navigate({ to: "/login", replace: true });
+            }}
+            aria-label="Sair da conta"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-primary-foreground/15 active:scale-95 transition-transform"
+          >
+            <LogOut className="h-5 w-5" />
+          </button>
         </div>
       </header>
 

@@ -29,6 +29,23 @@ export type DB = {
 
 const KEY = "controle-producao-v1";
 
+/** Escopo de dados por usuário logado. */
+let escopo: string | null = null;
+const chave = () => (escopo ? `${KEY}:${escopo}` : KEY);
+
+/** Troca o usuário dono dos dados (null = deslogado). */
+export function setEscopo(userId: string | null) {
+  if (escopo === userId) return;
+  escopo = userId;
+  loaded = false;
+  db = empty;
+  if (typeof window !== "undefined") {
+    db = load();
+    loaded = true;
+  }
+  emit();
+}
+
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 
 const seed = (): DB => {
@@ -75,14 +92,17 @@ function migrar(raw: DB): DB {
 function load(): DB {
   if (typeof window === "undefined") return empty;
   try {
-    const raw = window.localStorage.getItem(KEY);
+    const raw =
+      window.localStorage.getItem(chave()) ??
+      // primeira vez deste usuário: aproveita os dados que já existiam no aparelho
+      (escopo ? window.localStorage.getItem(KEY) : null);
     if (!raw) {
       const s = seed();
-      window.localStorage.setItem(KEY, JSON.stringify(s));
+      window.localStorage.setItem(chave(), JSON.stringify(s));
       return s;
     }
     const migrado = migrar(JSON.parse(raw) as DB);
-    window.localStorage.setItem(KEY, JSON.stringify(migrado));
+    window.localStorage.setItem(chave(), JSON.stringify(migrado));
     return migrado;
   } catch {
     return empty;
@@ -104,7 +124,7 @@ function setDB(next: DB) {
   db = next;
   if (typeof window !== "undefined") {
     try {
-      window.localStorage.setItem(KEY, JSON.stringify(next));
+      window.localStorage.setItem(chave(), JSON.stringify(next));
     } catch {
       // armazenamento cheio (fotos): mantém em memória
     }

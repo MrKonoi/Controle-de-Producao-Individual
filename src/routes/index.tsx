@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight, Package } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { useAuth, primeiroNome } from "@/lib/auth-store";
 import { useDB, hojeISO, formatBR, formatBRL, somaValor } from "@/lib/producao-store";
 
 export const Route = createFileRoute("/")({
@@ -27,6 +28,7 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const db = useDB();
+  const { atual } = useAuth();
   const { data } = Route.useSearch();
   const dia = data ?? hojeISO();
   const hoje = hojeISO();
@@ -37,7 +39,12 @@ function Home() {
   const itensAtivos = db.itens.filter((i) => !i.arquivado);
 
   return (
-    <AppShell title="Produção" subtitle={formatBR(dia)}>
+    <AppShell
+      title={
+        atual ? `Olá, ${primeiroNome(atual.nome)}! O que vamos produzir hoje?` : "Produção"
+      }
+      subtitle={formatBR(dia)}
+    >
       <div className="mb-5 rounded-3xl bg-card p-5 shadow-sm">
         <p className="text-sm font-medium text-muted-foreground">
           {dia === hoje ? "Produzido hoje" : `Produzido em ${formatBR(dia)}`}
