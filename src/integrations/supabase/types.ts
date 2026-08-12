@@ -14,7 +14,146 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      itens: {
+        Row: {
+          arquivado: boolean
+          created_at: string
+          id: string
+          nome: string
+          user_id: string
+        }
+        Insert: {
+          arquivado?: boolean
+          created_at?: string
+          id?: string
+          nome: string
+          user_id: string
+        }
+        Update: {
+          arquivado?: boolean
+          created_at?: string
+          id?: string
+          nome?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      producao: {
+        Row: {
+          created_at: string
+          data: string
+          foto: string | null
+          id: string
+          item_id: string
+          item_nome: string
+          observacao: string | null
+          quantidade: number
+          subitem_id: string
+          subitem_nome: string
+          user_id: string
+          valor_unit: number | null
+        }
+        Insert: {
+          created_at?: string
+          data: string
+          foto?: string | null
+          id?: string
+          item_id: string
+          item_nome?: string
+          observacao?: string | null
+          quantidade?: number
+          subitem_id: string
+          subitem_nome?: string
+          user_id: string
+          valor_unit?: number | null
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          foto?: string | null
+          id?: string
+          item_id?: string
+          item_nome?: string
+          observacao?: string | null
+          quantidade?: number
+          subitem_id?: string
+          subitem_nome?: string
+          user_id?: string
+          valor_unit?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "producao_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "itens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "producao_subitem_id_fkey"
+            columns: ["subitem_id"]
+            isOneToOne: false
+            referencedRelation: "subitens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          nome?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
+      subitens: {
+        Row: {
+          arquivado: boolean
+          created_at: string
+          id: string
+          item_id: string
+          nome: string
+          user_id: string
+          valor: number | null
+        }
+        Insert: {
+          arquivado?: boolean
+          created_at?: string
+          id?: string
+          item_id: string
+          nome: string
+          user_id: string
+          valor?: number | null
+        }
+        Update: {
+          arquivado?: boolean
+          created_at?: string
+          id?: string
+          item_id?: string
+          nome?: string
+          user_id?: string
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subitens_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "itens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
