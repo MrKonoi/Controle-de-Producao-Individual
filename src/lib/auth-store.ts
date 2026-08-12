@@ -75,6 +75,8 @@ function traduzir(msg: string) {
   if (m.includes("invalid login")) return "E-mail ou senha inválidos.";
   if (m.includes("already registered") || m.includes("already been registered"))
     return "Já existe uma conta com esse e-mail.";
+  if (m.includes("pwned") || m.includes("compromised") || m.includes("weak"))
+    return "Essa senha é muito comum e já vazou na internet. Escolha outra.";
   if (m.includes("password")) return "A senha precisa ter ao menos 6 caracteres.";
   if (m.includes("email")) return "Informe um e-mail válido.";
   return msg;
