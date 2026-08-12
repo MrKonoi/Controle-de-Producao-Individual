@@ -6,9 +6,8 @@ import { useDB, hojeISO, formatBR, formatBRL, somaValor } from "@/lib/producao-s
 
 export const Route = createFileRoute("/")({
   component: Home,
-  validateSearch: (search: Record<string, unknown>) => ({
-    data: typeof search.data === "string" ? search.data : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { data?: string } =>
+    typeof search.data === "string" ? { data: search.data } : {},
   head: () => ({
     meta: [
       { title: "Controle de Produção Diária" },
