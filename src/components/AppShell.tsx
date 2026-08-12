@@ -47,8 +47,7 @@ export function AppShell({
           <button
             type="button"
             onClick={() => {
-              sair();
-              navigate({ to: "/login", replace: true });
+              void sair().then(() => navigate({ to: "/login", replace: true }));
             }}
             aria-label="Sair da conta"
             className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-primary-foreground/15 active:scale-95 transition-transform"

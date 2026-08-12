@@ -1,54 +1,63 @@
 import { useSyncExternalStore } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { setEscopo } from "./producao-store";
 
 export type Usuario = {
   id: string;
   nome: string;
-  usuario: string; // login (normalizado, minúsculo)
-  senha: string; // simples, sem dados sensíveis
+  email: string;
 };
 
-const USERS_KEY = "controle-producao-usuarios-v1";
-const SESSION_KEY = "controle-producao-sessao-v1";
+type Estado = { atual: Usuario | null; pronto: boolean };
 
-const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
-const norm = (u: string) => u.trim().toLowerCase();
-
-type Estado = { usuarios: Usuario[]; atual: Usuario | null; pronto: boolean };
-
-const vazio: Estado = { usuarios: [], atual: null, pronto: false };
+const vazio: Estado = { atual: null, pronto: false };
 let estado: Estado = vazio;
-let carregado = false;
+let iniciado = false;
 const listeners = new Set<() => void>();
 
 function emit() {
   listeners.forEach((l) => l());
 }
 
-function persistir() {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(USERS_KEY, JSON.stringify(estado.usuarios));
-  if (estado.atual) window.localStorage.setItem(SESSION_KEY, estado.atual.id);
-  else window.localStorage.removeItem(SESSION_KEY);
+function setEstado(next: Estado) {
+  estado = next;
+  emit();
 }
 
-function carregar() {
-  if (carregado || typeof window === "undefined") return;
-  carregado = true;
-  let usuarios: Usuario[] = [];
-  try {
-    usuarios = JSON.parse(window.localStorage.getItem(USERS_KEY) ?? "[]") as Usuario[];
-  } catch {
-    usuarios = [];
+async function aplicarSessao(user: { id: string; email?: string | null } | null) {
+  if (!user) {
+    setEstado({ atual: null, pronto: true });
+    void setEscopo(null);
+    return;
   }
-  const id = window.localStorage.getItem(SESSION_KEY);
-  const atual = usuarios.find((u) => u.id === id) ?? null;
-  estado = { usuarios, atual, pronto: true };
-  setEscopo(atual?.id ?? null);
+  const anterior = estado.atual;
+  setEstado({
+    atual: { id: user.id, nome: anterior?.nome ?? "", email: user.email ?? "" },
+    pronto: true,
+  });
+  void setEscopo(user.id);
+  const { data } = await supabase.from("profiles").select("nome").eq("id", user.id).maybeSingle();
+  if (estado.atual?.id === user.id) {
+    setEstado({
+      atual: { id: user.id, nome: data?.nome || (user.email ?? "").split("@")[0], email: user.email ?? "" },
+      pronto: true,
+    });
+  }
+}
+
+function iniciar() {
+  if (iniciado || typeof window === "undefined") return;
+  iniciado = true;
+  supabase.auth.onAuthStateChange((_evento, sessao) => {
+    void aplicarSessao(sessao?.user ?? null);
+  });
+  void supabase.auth.getSession().then(({ data }) => {
+    void aplicarSessao(data.session?.user ?? null);
+  });
 }
 
 function subscribe(cb: () => void) {
-  carregar();
+  iniciar();
   listeners.add(cb);
   return () => listeners.delete(cb);
 }
@@ -56,47 +65,63 @@ function subscribe(cb: () => void) {
 export function useAuth(): Estado {
   return useSyncExternalStore(
     subscribe,
-    () => {
-      carregar();
-      return estado;
-    },
+    () => estado,
     () => vazio,
   );
 }
 
-export function cadastrar(nome: string, usuario: string, senha: string): string | null {
-  carregar();
-  const login = norm(usuario);
+function traduzir(msg: string) {
+  const m = msg.toLowerCase();
+  if (m.includes("invalid login")) return "E-mail ou senha inválidos.";
+  if (m.includes("already registered") || m.includes("already been registered"))
+    return "Já existe uma conta com esse e-mail.";
+  if (m.includes("pwned") || m.includes("compromised") || m.includes("weak"))
+    return "Essa senha é muito comum e já vazou na internet. Escolha outra.";
+  if (m.includes("password")) return "A senha precisa ter ao menos 6 caracteres.";
+  if (m.includes("email")) return "Informe um e-mail válido.";
+  return msg;
+}
+
+export async function cadastrar(
+  nome: string,
+  email: string,
+  senha: string,
+): Promise<string | null> {
   if (!nome.trim()) return "Informe seu nome completo.";
-  if (login.length < 3) return "O nome de usuário precisa ter ao menos 3 caracteres.";
-  if (senha.length < 4) return "A senha precisa ter ao menos 4 caracteres.";
-  if (estado.usuarios.some((u) => u.usuario === login)) return "Esse usuário já existe.";
-  const novo: Usuario = { id: uid(), nome: nome.trim(), usuario: login, senha };
-  estado = { ...estado, usuarios: [...estado.usuarios, novo], atual: novo };
-  persistir();
-  setEscopo(novo.id);
-  emit();
+  if (!email.includes("@")) return "Informe um e-mail válido.";
+  if (senha.length < 6) return "A senha precisa ter ao menos 6 caracteres.";
+  const { data, error } = await supabase.auth.signUp({
+    email: email.trim(),
+    password: senha,
+    options: {
+      emailRedirectTo: window.location.origin,
+      data: { nome: nome.trim() },
+    },
+  });
+  if (error) return traduzir(error.message);
+  if (data.user) {
+    await supabase.from("profiles").upsert({ id: data.user.id, nome: nome.trim() });
+    setEstado({
+      atual: { id: data.user.id, nome: nome.trim(), email: data.user.email ?? "" },
+      pronto: true,
+    });
+  }
   return null;
 }
 
-export function entrar(usuario: string, senha: string): string | null {
-  carregar();
-  const login = norm(usuario);
-  const achado = estado.usuarios.find((u) => u.usuario === login && u.senha === senha);
-  if (!achado) return "Usuário ou senha inválidos.";
-  estado = { ...estado, atual: achado };
-  persistir();
-  setEscopo(achado.id);
-  emit();
+export async function entrar(email: string, senha: string): Promise<string | null> {
+  const { error } = await supabase.auth.signInWithPassword({
+    email: email.trim(),
+    password: senha,
+  });
+  if (error) return traduzir(error.message);
   return null;
 }
 
-export function sair() {
-  carregar();
-  estado = { ...estado, atual: null };
-  persistir();
-  setEscopo(null);
-  emit();
+export async function sair() {
+  await supabase.auth.signOut();
+  setEstado({ atual: null, pronto: true });
+  void setEscopo(null);
 }
 
 export function primeiroNome(nome: string) {
