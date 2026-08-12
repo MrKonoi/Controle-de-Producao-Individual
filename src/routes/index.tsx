@@ -40,7 +40,9 @@ function Home() {
   return (
     <AppShell
       title={
-        atual ? `Olá, ${primeiroNome(atual.nome)}! O que vamos produzir hoje?` : "Produção"
+        atual?.nome
+          ? `Olá, ${primeiroNome(atual.nome)}! O que vamos produzir hoje?`
+          : "O que vamos produzir hoje?"
       }
       subtitle={formatBR(dia)}
     >
