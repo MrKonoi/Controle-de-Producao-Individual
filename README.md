@@ -1,6 +1,6 @@
-# Simple Focus App
+# Producao Individual
 
-Crie exatamente esta aplicação. Não adicione funcionalidades extras como login, usuários, permissões, integrações externas, exportação de arquivos ou backend complexo. Priorize simplicidade, manutenção fácil e uso em celular.
+Produto criado no Lovable, para controle individual e interno.
 
 This project was built with [Lovable](https://lovable.dev).
 
